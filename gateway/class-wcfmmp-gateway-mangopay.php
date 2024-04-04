@@ -54,36 +54,6 @@ class WCFMmp_Gateway_MangoPay extends WCFMmp_Abstract_Gateway
 		$payout_amount = 0;
 		$payout_fees = 0;
 
-
-		// error_log(
-		// 	print_r(
-		// 		[
-		// 			'class-wcfmmp-gateway-mangopay.php',
-		// 			'WCFM_Gateway_Mangopay - 1',
-		// 			'func = process_payment - 522',
-		// 			'withdrawal_id' . $withdrawal_id,
-		// 			'vendor_id' . $vendor_id,
-		// 			'withdraw_amount' . $withdraw_amount,
-		// 			'withdraw_charges' . $withdraw_charges,
-		// 			'transaction_mode_' . $transaction_mode,
-		// 		],
-		// 		true
-		// 	)
-		// );
-
-		// error_log(
-		// 	print_r(
-		// 		[
-		// 			'class-wcfmmp-gateway-mangopay.php',
-		// 			'validate_request',
-		// 			$this->validate_request(),
-		// 		],
-		// 		true
-		// 	)
-		// );
-
-		//die();
-
 		if ($this->validate_request()) {
 			// Updating withdrawal meta
 			$WCFMmp->wcfmmp_withdraw->wcfmmp_update_withdrawal_meta($this->withdrawal_id, 'withdraw_amount', $this->withdraw_amount);
@@ -98,16 +68,6 @@ class WCFMmp_Gateway_MangoPay extends WCFMmp_Abstract_Gateway
 			// get all commissions mapped to orders from $withdrawl_id
 			$withdrawal_info = $this->get_withdrawal_info($withdrawal_id);
 
-			// error_log(
-			// 	print_r(
-			// 		[
-			// 			'class-wcfmmp-gateway-mangopay.php',
-			// 			'withdrawal_info',
-			// 			//$withdrawal_info,
-			// 		],
-			// 		true
-			// 	)
-			// );
 
 			// get mangopay transaction info from each order mapped to each commission_id
 			// get vendor commission amount for each commission_id(i.e. marketplace_order_id)
@@ -410,7 +370,5 @@ class WCFMmp_Gateway_MangoPay extends WCFMmp_Abstract_Gateway
 		error_log(print_r([$response], true));
 		return $response;
 	}
-
-
 
 }
