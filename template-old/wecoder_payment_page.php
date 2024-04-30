@@ -246,13 +246,16 @@ if ($mangopay_notice_description && !empty($mangopay_notice_description)) {
 }
 
 
+
+
 //CREATE OPTIONS
 $mangopay_tab_option_html = '<ul>';
-$mangopay_tab_option_html .= '<li><a href="#" id="business_info" class="active" data-link="mangopay_wrapper_businessinfo">Business Information</a></li>';
+$mangopay_tab_option_html .= '<li><a href="#" id="business_info" class="active" data-link="mangopay_wrapper_businessinfo">Account Creation</a></li>';
 if ($user_mp_status == 'business' && $user_business_type == 'business') $mangopay_tab_option_html .= '<li><a href="#" id="business_info" data-link="mangopay_wrapper_uboinfo">UBO Information</a></li>';
 $mangopay_tab_option_html .= '<li><a href="#" id="business_info" data-link="mangopay_wrapper_kyc">KYC Details</a></li>';
 $mangopay_tab_option_html .= '<li><a href="#" id="business_info" data-link="mangopay_wrapper_bank_account">Bank Details</a></li>';
 $mangopay_tab_option_html .= '</ul>';
+
 
 $vendor_user_billing_fields += array(
     $gateway_slug . '_wrapper_section_options' => array(
@@ -262,8 +265,11 @@ $vendor_user_billing_fields += array(
     ),
 );
 
+
+
+
 // Business Information
-if ($user_mp_status == 'business') {
+if ($user_mp_status !== 'business') {
     $vendor_user_billing_fields += array(
         $gateway_slug . '_wrapper_businessinfo' => array(
             'type'    => 'html',
@@ -343,7 +349,7 @@ if ($user_mp_status == 'business') {
 /**
  * Our custom field - step 1
  */
-if ($user_business_type == 'business') {
+if ($user_business_type !== 'business') {
 
     $vendor_user_billing_fields += array(
         /**
@@ -369,8 +375,7 @@ if ($user_business_type == 'business') {
 }
 
 
-
-if ($user_mp_status == 'business') {
+if ($user_mp_status !== 'business') {
     $vendor_user_billing_fields += array(
         $gateway_slug . '_header_hqaddress' => array(
             'type'    => 'html',
@@ -503,7 +508,7 @@ if ($user_mp_status == 'business') {
 }
 
 // UBO Information
-if ($user_business_type == 'business') {
+if ($user_business_type !== 'business') {
     $vendor_user_billing_fields += array(
         $gateway_slug . '_wrapper_uboinfo' => array(
             'type'    => 'html',
@@ -522,6 +527,7 @@ $vendor_kyc_billing_fields = array(
         'value'    => '<div>',
     ),
 );
+
 $vendor_kyc_billing_fields += array(
     $gateway_slug . '_header_kyc' => array(
         'type'    => 'html',

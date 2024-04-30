@@ -72,6 +72,11 @@
         this.showHideMpStatusFileds.bind(this)
       );
       this.document.on(
+        "change",
+        this.user_business_type,
+        this.showHideMpBusinessTypeFileds.bind(this)
+      );
+      this.document.on(
         "click",
         this.submit_mp,
         this.createMangopayAcount.bind(this)
@@ -145,86 +150,117 @@
     },
 
     showHideMpStatusFileds: function (event) {
-      /**
-       * Let's catch all input id
-       */
-
-      // Get references to the hidden input fields
-      const default_vendor_status = $("#mangopay_default_vendor_status");
-      const default_business_type = $("#mangopay_default_business_type").val();
-
-      // Get references to the input fields
-      const user_mp_status = $("#mangopay_user_mp_status");
-      const user_business_type = $("#mangopay_user_business_type");
-
-      let selected_mp_status;
+      let user_type;
 
       if (undefined == event) {
         if (!$(this.user_mp_status).length) return;
-        selected_mp_status = $(this.user_mp_status).val();
+        user_type = $(this.user_mp_status).val();
       } else {
-        selected_mp_status = $(event.currentTarget).val();
+        user_type = $(event.currentTarget).val();
       }
 
-      /**
-       * User status field need to hide when it's value not either on first time
-       */
-
-      if ("either" !== $("#mangopay_default_vendor_status").val()) {
-        $("#mangopay_user_mp_status")
-          .hide()
-          .prev("label")
-          .hide()
-          .prev("p")
-          .hide();
-      }
-
-      if (selected_mp_status == "business") {
-        /**
-         * Business type field show or not
-         */
-
-        // We use the field
-        $("#mangopay_user_business_type")
-          .show()
-          .prev("label")
-          .show()
-          .prev("p")
-          .show();
-
-        // get default business type
-        //   console.log("default_business_type", default_business_type);
-
-        if ("either" === $("#mangopay_default_business_type").val()) {
-          // show it
-          $("#mangopay_user_business_type")
-            .show()
-            .prev("label")
-            .show()
-            .prev("p")
-            .show();
-        } else {
-          // hide it
-          $("#mangopay_user_business_type")
-            .hide()
-            .prev("label")
-            .hide()
-            .prev("p")
-            .hide();
-        }
-
-        //    console.log("user type =", selected_mp_status);
+      if ("individual" === user_type) {
+        $(this.user_business_type).hide().prev("label").hide().prev("p").hide();
       } else {
-        /** Is not business: should not be here neither have a value **/
-        $("#mangopay_user_business_type")
-          .val("")
-          .hide()
-          .prev("label")
-          .hide()
-          .prev("p")
-          .hide();
+        $(this.user_business_type).show().prev("label").show().prev("p").show();
       }
     },
+
+    showHideMpBusinessTypeFileds: function (event) {
+      let user_business_type;
+      if (undefined == event) {
+        if (!$(this.user_business_type).length) return;
+        user_business_type = $(this.user_business_type).val();
+      } else {
+        user_business_type = $(event.currentTarget).val();
+      }
+
+      if ("businesses" === user_business_type) {
+      }
+      console.log("event", user_business_type);
+    },
+
+    // showHideMpStatusFileds: function (event) {
+    //   /**
+    //    * Let's catch all input id
+    //    */
+
+    //   // Get references to the hidden input fields
+    //   const default_vendor_status = $("#mangopay_default_vendor_status");
+    //   const default_business_type = $("#mangopay_default_business_type").val();
+
+    //   // Get references to the input fields
+    //   const user_mp_status = $("#mangopay_user_mp_status");
+    //   const user_business_type = $("#mangopay_user_business_type");
+
+    //   let selected_mp_status;
+
+    //   if (undefined == event) {
+    //     if (!$(this.user_mp_status).length) return;
+    //     selected_mp_status = $(this.user_mp_status).val();
+    //   } else {
+    //     selected_mp_status = $(event.currentTarget).val();
+    //   }
+
+    //   /**
+    //    * User status field need to hide when it's value not either on first time
+    //    */
+
+    //   if ("either" !== $("#mangopay_default_vendor_status").val()) {
+    //     $("#mangopay_user_mp_status")
+    //       .hide()
+    //       .prev("label")
+    //       .hide()
+    //       .prev("p")
+    //       .hide();
+    //   }
+
+    //   if (selected_mp_status == "business") {
+    //     /**
+    //      * Business type field show or not
+    //      */
+
+    //     // We use the field
+    //     $("#mangopay_user_business_type")
+    //       .show()
+    //       .prev("label")
+    //       .show()
+    //       .prev("p")
+    //       .show();
+
+    //     // get default business type
+    //     //   console.log("default_business_type", default_business_type);
+
+    //     if ("either" === $("#mangopay_default_business_type").val()) {
+    //       // show it
+    //       $("#mangopay_user_business_type")
+    //         .show()
+    //         .prev("label")
+    //         .show()
+    //         .prev("p")
+    //         .show();
+    //     } else {
+    //       // hide it
+    //       $("#mangopay_user_business_type")
+    //         .hide()
+    //         .prev("label")
+    //         .hide()
+    //         .prev("p")
+    //         .hide();
+    //     }
+
+    //     //    console.log("user type =", selected_mp_status);
+    //   } else {
+    //     /** Is not business: should not be here neither have a value **/
+    //     $("#mangopay_user_business_type")
+    //       .val("")
+    //       .hide()
+    //       .prev("label")
+    //       .hide()
+    //       .prev("p")
+    //       .hide();
+    //   }
+    // },
 
     defaultMpStatusFileds: function () {
       console.log("heee", "defaultMpStatusFileds");
@@ -396,7 +432,7 @@
                 $updated.fadeOut(1000, function () {
                   // Redirect the user after the message fades out
                   //window.location.href = "/store-manager/";
-                   window.location.href = "/my-office/settings";
+                  window.location.href = "/my-office/settings";
                 });
               }, 5000);
               // console.log("success", response.success);
@@ -611,10 +647,12 @@
 
     changeMangopaySection: function (event) {
       event.preventDefault();
+      console.log(this);
       $("#mangopay_wrapper_section_options ul li a").removeClass("active");
       $(this).addClass("active");
       var link = $(this).attr("data-link");
       $(".mangopay_information_section").hide();
+      console.log(link);
       $("#" + link).show();
     },
 
@@ -625,11 +663,11 @@
       }
     },
 
-   // setPaymentMode: function () {
-   //   setTimeout(function () {
-   //     $("#payment_mode").attr("data-status", "set");
-  //    }, 5000);
-  //  },
+    // setPaymentMode: function () {
+    //   setTimeout(function () {
+    //     $("#payment_mode").attr("data-status", "set");
+    //    }, 5000);
+    //  },
 
     changeBillingCountry: function (event, countrySelect, stateSelect) {
       event.preventDefault();

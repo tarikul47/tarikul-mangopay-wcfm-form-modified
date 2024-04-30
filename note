@@ -1,0 +1,43 @@
+Natural user
+
+    First name
+    Last name
+    Email
+    Date of birth
+    Nationality
+    Country of residence
+
+Legal user – Business
+
+    Registered name of the entity
+    Email for the entity
+    Registered address of the entity’s headquarters
+    Company registration number
+    Legal representative's: first name, last name, email, date of birth, nationality, country of residence
+
+Legal user – Partnership, Organization
+
+    Registered name of the entity
+    Email for the entity
+    Registered address of the entity’s headquarters
+    Legal representative
+    An individual legally appointed to represent a legal entity, authorized to sign contracts on its behalf.
+
+    Read more 's: first name, last name, email, date of birth, nationality, country of residence
+
+
+Legal user – Soletrader
+
+    Registered name of the sole proprietorship
+    Email for the sole proprietorship
+    Registered address of the sole proprietorship
+    Sole proprietor's: first name, last name, email, date of birth, nationality, country of residence
+
+
+
+1. Compnay Name [ Title Diffrent-> ]
+2. Email 
+3. Company headquarters address [ Title Diffrent-> ]
+4. First Name + Last Name + Email + Birthday + Nationality + COR +
+
+5. Company registration number [ Business type user ]

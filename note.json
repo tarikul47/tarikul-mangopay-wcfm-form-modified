@@ -47,50 +47,30 @@
 )
 }
 
-
-MangoPay\PayOut Object
-(
-    [Id] => po_m_01HSYJ0WP7YZ064ZD6DXKDKQ51
-    [Tag] => Commission for WC Order #0 - ValidatedBy:k-lancer_withdraw
-    [CreationDate] => 1711496262
-    [AuthorId] => user_m_01HS76N38M7HN842QQT3QRENQD
-    [CreditedUserId] => 
-    [DebitedFunds] => MangoPay\Money Object
+[
+    [user_id] => 
+    [birthday] => January 19, 1962
+    [nationality] => AX
+    [billing_country] => BD
+    [legal_email] => tarikul47@gmail.com
+    [user_mp_status] => business
+    [user_business_type] => organisation
+    [compagny_number] => Web Developer Service
+    [hq_address] => H# 197, Shaheed Smrity School Road, Hazipara(Jamai Bazar)
+    [hq_address2] => Headquarters address 2
+    [hq_city] => Tongi
+    [hq_region] => Gazipur
+    [hq_postalcode] => 1710
+    [hq_country] => BD
+    [kyc_details] => Array
         (
-            [Currency] => EUR
-            [Amount] => 12720
+            [0] => Array
+                (
+                    [type] => IDENTITY_PROOF
+                    [file] => 
+                )
+
         )
 
-    [CreditedFunds] => MangoPay\Money Object
-        (
-            [Currency] => EUR
-            [Amount] => 12720
-        )
-
-    [Fees] => MangoPay\Money Object
-        (
-            [Currency] => EUR
-            [Amount] => 0
-        )
-
-    [Status] => SUCCEEDED
-    [ResultCode] => 000000
-    [ResultMessage] => Success
-    [ExecutionDate] => 1711496262
-    [Type] => PAYOUT
-    [Nature] => REGULAR
-    [DebitedWalletId] => wlt_m_01HS76N3NT8QK4FQ3EQZ007PJB
-    [CreditedWalletId] => 
-    [PaymentType] => BANK_WIRE
-    [MeanOfPaymentDetails] => MangoPay\PayOutPaymentDetailsBankWire Object
-        (
-            [BankAccountId] => bankacc_m_01HS76WE1R4RHPH1B243C2CN0A
-            [BankWireRef] => ID 0
-            [PayoutModeRequested] => 
-            [ModeRequested] => 
-            [ModeApplied] => 
-            [FallbackReason] => 
-            [Status] => SUCCEEDED
-        )
-
-)
+    [bank_details] => Array
+]

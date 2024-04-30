@@ -61,7 +61,7 @@ class WCFM_PG_MangoPay
 
 		add_filter('mangopay_vendors_required_class', array(&$this, 'set_mangopay_vendors_required_class'));
 
-		//	add_action("wp_ajax_create_mp_account", array(&$this, "create_mp_account"));
+		add_action("wp_ajax_create_mp_account", array(&$this, "create_mp_account"));
 
 		add_action("wp_ajax_update_mp_business_information", array(&$this, "update_mp_business_information"));
 
@@ -711,363 +711,297 @@ class WCFM_PG_MangoPay
 		return 'WCFMmp';
 	}
 
-	public function validate_data($vendor_id, $data)
+	public function update_mangopay_settings($wp_user_id, $wcfm_settings_form)
 	{
-		$errors = [];
+	//	error_log(print_r($wp_user_id, true));
+		error_log(print_r($wcfm_settings_form['payment']['mangopay'], true));
 
-		/**
-		 * Default Required Fields 
-		 * 1. user_birthday
-		 * 2. user_nationality
-		 * 3. billing_country
-		 * 4. user_mp_status
-		 * 5. user_business_type
-		 * 6. Headquarters Addressline [5]
-		 * 7. terms and condition = Form 
-		 * 
-		 * 8. compagny_number
-		 * 
-		 * . first_name = user data
-		 * . last_name = user data 
-		 * . email = user data 
-		 * 
-		 * . user_category = we set
-		 * 13. tag = we set 
-		 */
+		$this->status = 'true';
+		$this->message['message'] = 'Settings saved successfully - raju';
+		$gateway_slug = WCFMpgmp_GATEWAY;
+		$vendor_data = get_user_meta($wp_user_id, 'wcfmmp_profile_settings', true);
+		$user_business_type = get_user_meta($wp_user_id, 'user_business_type', true) ? get_user_meta($wp_user_id, 'user_business_type', true) : '';
 
-		$required_fields = [
-			'user_birthday' => 'User Birthday',
-			'user_nationality' => 'User Nationality',
-			'billing_country' => 'Billing Country',
-			'compnay_name' => 'Compnay Name',
-			'user_mp_status' => 'User MP Status',
-			'user_business_type' => 'User Business Type', // Commented out since it's conditionally added
-			'hq_address' => 'Headquarters Addressline1',
-			'hq_city' => 'Headquarters City',
-			'hq_region' => 'Headquarters Region',
-			'hq_postalcode' => 'Headquarters Postalcode',
-			'hq_country' => 'Headquarters Country',
-			'termsconditions' => 'Terms Conditions',
-		];
-
-		$business_required_fields = [
-			'compagny_number' => 'Company Number',
-		];
-
-		// Merge business_required_fields if user_business_type is 'business'
-		if (isset($data['user_mp_status']) && $data['user_mp_status'] === 'business') {
-			if (isset($data['user_business_type']) && $data['user_business_type'] === 'business') {
-				// Merge arrays based on the condition
-				$required_fields = array_merge($required_fields, $business_required_fields);
+		if ('either' === $this->mp->default_vendor_status) {
+			if (isset($wcfm_settings_form['payment'][$gateway_slug]['user_mp_status'])) {
+				update_user_meta($wp_user_id, 'user_mp_status', $wcfm_settings_form['payment'][$gateway_slug]['user_mp_status']);
 			}
 		}
-		//	error_log(print_r($required_fields, true));
 
-		foreach ($required_fields as $field => $label) {
+		if ('either' === $this->mp->default_vendor_status || 'businesses' === $this->mp->default_vendor_status) {
 
-			// Check if the field is empty
-			if (empty($data[$field])) {
-				$errors[$field] = "Error: {$label} is required.";
-			} else {
-				// Additional validation for specific fields
-				switch ($field) {
-					case 'legal_email':
-						// Validate email format
-						if (!filter_var($data[$field], FILTER_VALIDATE_EMAIL)) {
-							$errors[$field] = "Error: {$label} is not a valid email address.";
-						}
-						break;
-					case 'compagny_number':
-						// Validate company number using a custom function
-						$cn_validation = $this->mp->check_company_number_patterns($data[$field]);
+			if ('either' === $this->mp->default_business_type) {
 
-						if ($cn_validation != 'found') {
-							$errors[$field] = "Error: {$label} is not a valid.";
-						}
-						break;
-					// Add more cases for other fields
-					default:
-						// No specific validation for other fields
-						break;
+				if (isset($wcfm_settings_form['payment'][$gateway_slug]['user_business_type'])) {
+
+					update_user_meta($wp_user_id, 'user_business_type', $wcfm_settings_form['payment'][$gateway_slug]['user_business_type']);
 				}
 			}
 		}
-		return $errors;
-	}
 
-	/**
-	 * Create Mangopay Account 
-	 */
-	public function wcfm_create_mp_account($wp_user_id, $data)
-	{
-		//error_log(print_r($data, true));
-
-		// validation process
-		$errors = $this->validate_data($wp_user_id, $data);
-
-		if (!empty($errors)) {
-			wp_send_json_error(['errors' => $errors]);
-		} else {
+		if (isset($wcfm_settings_form['payment'][$gateway_slug]['birthday'])) {
+			update_user_meta($wp_user_id, 'user_birthday', $wcfm_settings_form['payment'][$gateway_slug]['birthday']);
 		}
-	}
 
-	public function update_mangopay_settings($wp_user_id, $wcfm_settings_form)
-	{
-		$gateway_slug = WCFMpgmp_GATEWAY;
+		if (isset($wcfm_settings_form['payment'][$gateway_slug]['nationality'])) {
+			update_user_meta($wp_user_id, 'user_nationality', $wcfm_settings_form['payment'][$gateway_slug]['nationality']);
+		}
 
-		// Find Out MP user account 
+		/* if (isset($wcfm_settings_form['payment'][$gateway_slug]['compagny_number'])) {
+						update_user_meta($wp_user_id, 'compagny_number', $wcfm_settings_form['payment'][$gateway_slug]['compagny_number']);
+					} */
+
 		$mp_user_id = $this->mp->set_mp_user($wp_user_id);
-		//	error_log(print_r($wcfm_settings_form, true));
 
-		// 
-		if (empty($mp_user_id)) {
-			// Here we need to create MP account for this user 
-			$this->wcfm_create_mp_account($wp_user_id, $wcfm_settings_form['payment']['mangopay']);
-		} else {
-			// KYC added 
-			// Bank Added 
+		if (!$mp_user_id) {
+			mangopay_log(__('Can not create mangopay user, please make sure to fill up your profile & address fields such as Fisrt Name, Last Name, Email, Billing Country etc', 'wc-multivendor-marketplace'), 'error');
+			return;
+		}
+
+		error_log('message stop 1');
+
+		if (isset($wcfm_settings_form['mangopay_upload_kyc_status']) && $wcfm_settings_form['mangopay_upload_kyc_status'] == 'yes') {
+
+			error_log('message stop 2');
+
+			$kyc_details = isset($wcfm_settings_form['payment'][$gateway_slug]['kyc_details']) ? $wcfm_settings_form['payment'][$gateway_slug]['kyc_details'] : array();
+
+			if (is_array($kyc_details) && !empty($kyc_details)) {
+
+				error_log('kyc is array');
+
+				$kyc_details = wp_list_pluck($kyc_details, 'file', 'type');
+
+				foreach ($kyc_details as $type => $file) {
+					$KycDocument = new \MangoPay\KycDocument();
+					$KycDocument->Tag = "wp_user_id:" . $wp_user_id;
+					$KycDocument->Type = $type;
+
+					try {
+
+						$document_created = $this->mp->create_kyc_document($mp_user_id, $KycDocument);
+						$kycDocumentId = $document_created->Id;
+					} catch (MangoPay\Libraries\ResponseException $e) {
+
+						mangopay_log($e->GetMessage(), 'error');
+						$this->message['message'] = $e->GetMessage();
+					} catch (MangoPay\Libraries\Exception $e) {
+
+						mangopay_log($e->GetMessage(), 'error');
+						$this->message['message'] = $e->GetMessage();
+					}
+
+					if ($kycDocumentId) {
+						$this->mp->create_kyc_page_from_file($mp_user_id, $kycDocumentId, get_attached_file($file));
+
+						$the_doc = $this->mp->get_kyc_document($mp_user_id, $kycDocumentId);
+						$the_doc->Status = "VALIDATION_ASKED";
+						$result = $this->mp->update_kyc_document($mp_user_id, $the_doc);
+
+						//	error_log(print_r($result, true));
+					}
+
+
+					// try {
+					// 	$document_created = $this->mp->create_kyc_document($mp_user_id, $KycDocument);
+					// 	$kycDocumentId = $document_created->Id;
+
+					// 	error_log('kyc create = 2504');
+
+					// 	//	if ($kycDocumentId) {
+					// 	//	$uploaded = $this->mp->create_kyc_page_from_file($mp_user_id, $kycDocumentId, get_attached_file($file));
+
+					// 	//	error_log(print_r($uploaded, true));
+
+					// 	error_log(get_attached_file($file));
+					// 	//	error_log('message stop file', $file);
+					// 	//	error_log(print_r($uploaded, true));
+					// 	error_log('message stop 4');
+
+					// 	//	die();
+
+					// 	//	if ($uploaded) {
+					// 	//	$KycDocument = new \MangoPay\KycDocument();
+					// 	//	$KycDocument->Id = $kycDocumentId;
+
+					// 	$the_doc = $this->mp->get_kyc_document($mp_user_id, $kycDocumentId);
+
+					// 	$the_doc->Status = "VALIDATION_ASKED";
+
+					// 	//	$KycDocument->Status = \MangoPay\KycDocumentStatus::ValidationAsked;
+
+					// 	error_log(print_r($the_doc, true));
+
+					// 	//die(); raju
+
+					// 	$Result = $this->mp->update_kyc_document($mp_user_id, $the_doc);
+
+					// 	if ($Result) {
+					// 		$data_meta['type'] = $type;
+					// 		$data_meta['id_mp_doc'] = $kycDocumentId;
+					// 		$data_meta['creation_date'] = $Result->CreationDate;
+					// 		$data_meta['document_name'] = basename(get_attached_file($file));
+					// 		update_user_meta($wp_user_id, 'kyc_document_' . $kycDocumentId, $data_meta);
+					// 	}
+					// 	//	}
+					// 	//	}
+					// } catch (MangoPay\Libraries\ResponseException $e) {
+
+					// 	mangopay_log($e->GetMessage(), 'error');
+					// 	$this->message['message'] = $e->GetMessage();
+					// } catch (MangoPay\Libraries\Exception $e) {
+
+					// 	mangopay_log($e->GetMessage(), 'error');
+					// 	$this->message['message'] = $e->GetMessage();
+					// }
+				}
+			}
+			// we don't need this field value to be saved
+			unset($wcfm_settings_form['mangopay_upload_kyc']);
+		}
+
+		$umeta_key = 'mp_account_id';
+		if (!$this->mp->is_production()) {
+			$umeta_key .= '_sandbox';
+		}
+
+		$existing_account_id = get_user_meta($wp_user_id, $umeta_key, true);
+		$bank_details = $wcfm_settings_form['payment'][$gateway_slug]['bank_details'];
+		$type = isset($bank_details['vendor_account_type']) ? $bank_details['vendor_account_type'] : '';
+		$name = isset($bank_details['vendor_account_name']) ? $bank_details['vendor_account_name'] : '';
+		$address1 = isset($bank_details['vendor_account_address1']) ? $bank_details['vendor_account_address1'] : '';
+		$address2 = isset($bank_details['vendor_account_address2']) ? $bank_details['vendor_account_address2'] : '';
+		$city = isset($bank_details['vendor_account_city']) ? $bank_details['vendor_account_city'] : '';
+		$postcode = isset($bank_details['vendor_account_postcode']) ? $bank_details['vendor_account_postcode'] : '';
+		$region = isset($bank_details['vendor_account_region']) ? $bank_details['vendor_account_region'] : '';
+		$country = isset($bank_details['vendor_account_country']) ? $bank_details['vendor_account_country'] : '';
+
+		$account_types = mangopayWCConfig::$account_types;
+		$account_type = $account_types[$type];
+		$needs_update = false;
+		$account_data = array();
+
+		/** Record redacted bank account data in vendor's usermeta **/
+		foreach ($account_type as $field => $c) {
+			if (isset($bank_details[$field]) && $bank_details[$field] && !preg_match('/\*\*/', $bank_details[$field])) {
+				if (isset($c['redact']) && $c['redact']) {
+					$needs_update = true;
+					list($obf_start, $obf_end) = explode(',', $c['redact']);
+					$strlen = strlen($bank_details[$field]);
+
+					/**
+					 * if its <=5 characters, lets just redact the whole thing
+					 * @see: https://github.com/Mangopay/wordpress-plugin/issues/12
+					 */
+					if ($strlen <= 5) {
+						$to_be_stored = str_repeat('*', $strlen);
+					} else {
+						$obf_center = $strlen - $obf_start - $obf_end;
+						if ($obf_center < 2) {
+							$obf_center = 2;
+						}
+
+						$to_be_stored = substr($bank_details[$field], 0, $obf_start) .
+							str_repeat('*', $obf_center) .
+							substr($bank_details[$field], -$obf_end, $obf_end);
+					}
+				} else {
+					if (get_user_meta($wp_user_id, $field, true) != $bank_details[$field]) {
+						$needs_update = true;
+					}
+					$to_be_stored = $bank_details[$field];
+				}
+				$wcfm_settings_form['payment'][$gateway_slug]['bank_details'][$field] = $to_be_stored;
+				update_user_meta($wp_user_id, $field, $to_be_stored);
+				$account_data[$field] = $bank_details[$field];
+			}
+		}
+
+
+
+		/** Record clear text bank account data in vendor's usermeta **/
+		$account_clear_data = array(
+			'headquarters_addressline1',
+			'headquarters_addressline2',
+			'headquarters_city',
+			'headquarters_region',
+			'headquarters_postalcode',
+			'headquarters_country',
+			'vendor_account_type',
+			'vendor_account_name',
+			'vendor_account_address1',
+			'vendor_account_address2',
+			'vendor_account_city',
+			'vendor_account_postcode',
+			'vendor_account_region',
+			'vendor_account_country'
+		);
+
+		foreach ($account_clear_data as $field) {
+			/** update_user_meta() returns "false" if the value is unchanged **/
+			if (isset($bank_details[$field]) && update_user_meta($wp_user_id, $field, $bank_details[$field])) {
+				$needs_update = true;
+			}
+		}
+
+		/* if ($wcfm_settings_form['payment'][$gateway_slug]['compagny_number']) :
+						$this->mp->update_user($mp_user_id, array('compagny_number' => $wcfm_settings_form['payment'][$gateway_slug]['compagny_number'], 'last_name' => 'Alom'));
+					endif; */
+
+		if (isset($wcfm_settings_form['mangopay_add_bank_status']) && $wcfm_settings_form['mangopay_add_bank_status'] == 'yes') {
+			if ($needs_update) {
+				$this->bank_info_validation($account_data);
+				try {
+					$mp_account_id = $this->mp->save_bank_account(
+
+						$mp_user_id,
+						$wp_user_id,
+						$existing_account_id,
+						$type,
+						$name,
+						$address1,
+						$address2,
+						$city,
+						$postcode,
+						$region,
+						$country,
+						$account_data,
+						$account_types
+					);
+
+					if ($mp_account_id) {
+						update_user_meta($wp_user_id, $umeta_key, $mp_account_id);
+						update_user_meta($wp_user_id, 'mp_bank_account', true);
+					} else {
+						$this->status = 'false';
+						$this->message['message'] = 'Invalid Bank Account Information. Please insert all required information!';
+					}
+				} catch (MangoPay\Libraries\ResponseException $e) {
+					mangopay_log($e->GetMessage(), 'error');
+					$this->status = 'false';
+					$this->message['message'] = 'Invalid Bank Account Information. Please insert all required information!';
+				} catch (MangoPay\Libraries\Exception $e) {
+					mangopay_log($e->GetMessage(), 'error');
+					$this->status = 'false';
+					$this->message['message'] = 'Invalid Bank Account Information. Please insert all required information!';
+				}
+			}
+		}
+
+		update_user_meta($wp_user_id, 'wcfmmp_profile_settings', $wcfm_settings_form);
+
+		if ($this->status == 'false') {
+			echo '{"status": ' . $this->status . ', "message": "' . $this->message['message'] . '"}';
+			die;
 		}
 	}
 
-
-	// public function update_mangopay_settings($wp_user_id, $wcfm_settings_form)
-	// {
-	// 	$this->status = 'true';
-	// 	$this->message['message'] = 'Settings saved successfully';
-	// 	$gateway_slug = WCFMpgmp_GATEWAY;
-	// 	$vendor_data = get_user_meta($wp_user_id, 'wcfmmp_profile_settings', true);
-	// 	$user_business_type = get_user_meta($wp_user_id, 'user_business_type', true) ? get_user_meta($wp_user_id, 'user_business_type', true) : '';
-
-	// 	//	error_log(print_r('$vendor_data', true));
-	// 	//	error_log(print_r($vendor_data, true));
-	// 	error_log(print_r($wcfm_settings_form, true));
-	// 	error_log(print_r('$wcfm_settings_form', true));
-
-	// 	// user_mp_status save 
-	// 	if ('either' === $this->mp->default_vendor_status) {
-	// 		if (isset($wcfm_settings_form['payment'][$gateway_slug]['user_mp_status'])) {
-	// 			update_user_meta($wp_user_id, 'user_mp_status', $wcfm_settings_form['payment'][$gateway_slug]['user_mp_status']);
-	// 		}
-	// 	}
-
-	// 	// user_business_type
-	// 	if ('either' === $this->mp->default_vendor_status || 'businesses' === $this->mp->default_vendor_status) {
-	// 		if ('either' === $this->mp->default_business_type) {
-	// 			if (isset($wcfm_settings_form['payment'][$gateway_slug]['user_business_type'])) {
-	// 				update_user_meta($wp_user_id, 'user_business_type', $wcfm_settings_form['payment'][$gateway_slug]['user_business_type']);
-	// 			}
-	// 		}
-	// 	}
-
-	// 	// Birthday save 
-	// 	if (isset($wcfm_settings_form['payment'][$gateway_slug]['birthday'])) {
-	// 		update_user_meta($wp_user_id, 'user_birthday', $wcfm_settings_form['payment'][$gateway_slug]['birthday']);
-	// 	}
-
-	// 	// User Nationality save
-	// 	if (isset($wcfm_settings_form['payment'][$gateway_slug]['nationality'])) {
-	// 		update_user_meta($wp_user_id, 'user_nationality', $wcfm_settings_form['payment'][$gateway_slug]['nationality']);
-	// 	}
-
-	// 	/* 
-	// 								 if (isset($wcfm_settings_form['payment'][$gateway_slug]['compagny_number'])) {
-	// 									 update_user_meta($wp_user_id, 'compagny_number', $wcfm_settings_form['payment'][$gateway_slug]['compagny_number']);
-	// 								 }
-	// 								 */
-
-	// 	$mp_user_id = $this->mp->set_mp_user($wp_user_id);
-
-	// 	if (!$mp_user_id) {
-	// 		mangopay_log(__('Can not create mangopay user, please make sure to fill up your profile & address fields such as Fisrt Name, Last Name, Email, Billing Country etc', 'wc-multivendor-marketplace'), 'error');
-	// 		return;
-	// 	}
-
-	// 	error_log('message stop 1');
-
-	// 	if (isset($wcfm_settings_form['mangopay_upload_kyc_status']) && $wcfm_settings_form['mangopay_upload_kyc_status'] == 'yes') {
-
-	// 		error_log('message stop 2');
-
-	// 		$kyc_details = isset($wcfm_settings_form['payment'][$gateway_slug]['kyc_details']) ? $wcfm_settings_form['payment'][$gateway_slug]['kyc_details'] : array();
-
-	// 		if (is_array($kyc_details) && !empty($kyc_details)) {
-
-	// 			error_log('kyc is array');
-
-	// 			$kyc_details = wp_list_pluck($kyc_details, 'file', 'type');
-
-	// 			foreach ($kyc_details as $type => $file) {
-	// 				$KycDocument = new \MangoPay\KycDocument();
-	// 				$KycDocument->Tag = "wp_user_id:" . $wp_user_id;
-	// 				$KycDocument->Type = $type;
-
-	// 				try {
-
-	// 					$document_created = $this->mp->create_kyc_document($mp_user_id, $KycDocument);
-	// 					$kycDocumentId = $document_created->Id;
-	// 				} catch (MangoPay\Libraries\ResponseException $e) {
-
-	// 					mangopay_log($e->GetMessage(), 'error');
-	// 					$this->message['message'] = $e->GetMessage();
-	// 				} catch (MangoPay\Libraries\Exception $e) {
-
-	// 					mangopay_log($e->GetMessage(), 'error');
-	// 					$this->message['message'] = $e->GetMessage();
-	// 				}
-
-	// 				if ($kycDocumentId) {
-	// 					$this->mp->create_kyc_page_from_file($mp_user_id, $kycDocumentId, get_attached_file($file));
-
-	// 					$the_doc = $this->mp->get_kyc_document($mp_user_id, $kycDocumentId);
-	// 					$the_doc->Status = "VALIDATION_ASKED";
-	// 					$result = $this->mp->update_kyc_document($mp_user_id, $the_doc);
-	// 				}
-	// 			}
-	// 		}
-	// 		// we don't need this field value to be saved
-	// 		unset($wcfm_settings_form['mangopay_upload_kyc']);
-	// 	}
-
-	// 	$umeta_key = 'mp_account_id';
-	// 	if (!$this->mp->is_production()) {
-	// 		$umeta_key .= '_sandbox';
-	// 	}
-
-	// 	$existing_account_id = get_user_meta($wp_user_id, $umeta_key, true);
-	// 	$bank_details = $wcfm_settings_form['payment'][$gateway_slug]['bank_details'];
-	// 	$type = isset($bank_details['vendor_account_type']) ? $bank_details['vendor_account_type'] : '';
-	// 	$name = isset($bank_details['vendor_account_name']) ? $bank_details['vendor_account_name'] : '';
-	// 	$address1 = isset($bank_details['vendor_account_address1']) ? $bank_details['vendor_account_address1'] : '';
-	// 	$address2 = isset($bank_details['vendor_account_address2']) ? $bank_details['vendor_account_address2'] : '';
-	// 	$city = isset($bank_details['vendor_account_city']) ? $bank_details['vendor_account_city'] : '';
-	// 	$postcode = isset($bank_details['vendor_account_postcode']) ? $bank_details['vendor_account_postcode'] : '';
-	// 	$region = isset($bank_details['vendor_account_region']) ? $bank_details['vendor_account_region'] : '';
-	// 	$country = isset($bank_details['vendor_account_country']) ? $bank_details['vendor_account_country'] : '';
-
-	// 	$account_types = mangopayWCConfig::$account_types;
-	// 	$account_type = $account_types[$type];
-	// 	$needs_update = false;
-	// 	$account_data = array();
-
-	// 	/* Record redacted bank account data in vendor's usermeta */
-	// 	foreach ($account_type as $field => $c) {
-	// 		if (isset($bank_details[$field]) && $bank_details[$field] && !preg_match('/\*\*/', $bank_details[$field])) {
-	// 			if (isset($c['redact']) && $c['redact']) {
-	// 				$needs_update = true;
-	// 				list($obf_start, $obf_end) = explode(',', $c['redact']);
-	// 				$strlen = strlen($bank_details[$field]);
-
-	// 				/**
-	// 				 * if its <=5 characters, lets just redact the whole thing
-	// 				 * @see: https://github.com/Mangopay/wordpress-plugin/issues/12
-	// 				 */
-	// 				if ($strlen <= 5) {
-	// 					$to_be_stored = str_repeat('*', $strlen);
-	// 				} else {
-	// 					$obf_center = $strlen - $obf_start - $obf_end;
-	// 					if ($obf_center < 2) {
-	// 						$obf_center = 2;
-	// 					}
-
-	// 					$to_be_stored = substr($bank_details[$field], 0, $obf_start) .
-	// 						str_repeat('*', $obf_center) .
-	// 						substr($bank_details[$field], -$obf_end, $obf_end);
-	// 				}
-	// 			} else {
-	// 				if (get_user_meta($wp_user_id, $field, true) != $bank_details[$field]) {
-	// 					$needs_update = true;
-	// 				}
-	// 				$to_be_stored = $bank_details[$field];
-	// 			}
-	// 			$wcfm_settings_form['payment'][$gateway_slug]['bank_details'][$field] = $to_be_stored;
-	// 			update_user_meta($wp_user_id, $field, $to_be_stored);
-	// 			$account_data[$field] = $bank_details[$field];
-	// 		}
-	// 	}
-
-	// 	/* Record clear text bank account data in vendor's usermeta */
-	// 	$account_clear_data = array(
-	// 		'headquarters_addressline1',
-	// 		'headquarters_addressline2',
-	// 		'headquarters_city',
-	// 		'headquarters_region',
-	// 		'headquarters_postalcode',
-	// 		'headquarters_country',
-	// 		'vendor_account_type',
-	// 		'vendor_account_name',
-	// 		'vendor_account_address1',
-	// 		'vendor_account_address2',
-	// 		'vendor_account_city',
-	// 		'vendor_account_postcode',
-	// 		'vendor_account_region',
-	// 		'vendor_account_country'
-	// 	);
-
-	// 	foreach ($account_clear_data as $field) {
-	// 		/* update_user_meta() returns "false" if the value is unchanged */
-	// 		if (isset($bank_details[$field]) && update_user_meta($wp_user_id, $field, $bank_details[$field])) {
-	// 			$needs_update = true;
-	// 		}
-	// 	}
-
-	// 	/* if ($wcfm_settings_form['payment'][$gateway_slug]['compagny_number']) :
-	// 																	$this->mp->update_user($mp_user_id, array('compagny_number' => $wcfm_settings_form['payment'][$gateway_slug]['compagny_number'], 'last_name' => 'Alom'));
-	// 																endif; */
-
-	// 	if (isset($wcfm_settings_form['mangopay_add_bank_status']) && $wcfm_settings_form['mangopay_add_bank_status'] == 'yes') {
-	// 		if ($needs_update) {
-	// 			$this->bank_info_validation($account_data);
-	// 			try {
-	// 				$mp_account_id = $this->mp->save_bank_account(
-
-	// 					$mp_user_id,
-	// 					$wp_user_id,
-	// 					$existing_account_id,
-	// 					$type,
-	// 					$name,
-	// 					$address1,
-	// 					$address2,
-	// 					$city,
-	// 					$postcode,
-	// 					$region,
-	// 					$country,
-	// 					$account_data,
-	// 					$account_types
-	// 				);
-
-	// 				if ($mp_account_id) {
-	// 					update_user_meta($wp_user_id, $umeta_key, $mp_account_id);
-	// 					update_user_meta($wp_user_id, 'mp_bank_account', true);
-	// 				} else {
-	// 					$this->status = 'false';
-	// 					$this->message['message'] = 'Invalid Bank Account Information. Please insert all required information!';
-	// 				}
-	// 			} catch (MangoPay\Libraries\ResponseException $e) {
-	// 				mangopay_log($e->GetMessage(), 'error');
-	// 				$this->status = 'false';
-	// 				$this->message['message'] = 'Invalid Bank Account Information. Please insert all required information!';
-	// 			} catch (MangoPay\Libraries\Exception $e) {
-	// 				mangopay_log($e->GetMessage(), 'error');
-	// 				$this->status = 'false';
-	// 				$this->message['message'] = 'Invalid Bank Account Information. Please insert all required information!';
-	// 			}
-	// 		}
-	// 	}
-
-	// 	update_user_meta($wp_user_id, 'wcfmmp_profile_settings', $wcfm_settings_form);
-
-	// 	if ($this->status == 'false') {
-	// 		echo '{"status": ' . $this->status . ', "message": "' . $this->message['message'] . '"}';
-	// 		die;
-	// 	}
-	// }
-
-
 	/**
-	 * Bank Info Validation
-	 * @access public
-	 * @return void
-	 */
+		   * Bank Info Validation
+		   * @access public
+		   * @return void
+
+		   */
 	public function bank_info_validation($account_data = array())
 	{
 		$success = true;
@@ -1193,6 +1127,80 @@ class WCFM_PG_MangoPay
 		if ('' != $class_name && '' != $this->token) {
 			require_once ('class-' . esc_attr($this->token) . '-' . esc_attr($class_name) . '.php');
 		} // End If Statement
+	}
+
+	public function validate_data($data, $vendor_id)
+	{
+		$errors = [];
+		$data_type = isset($data['action']) ? $data['action'] : ''; // Assuming data_type indicates create or update
+
+		$create_required_fields = [
+			'payment_method' => 'mangopay',
+			'billing_first_name' => 'First Name',
+			'billing_last_name' => 'Last Name',
+			'user_birthday' => 'User Birthday',
+			'user_nationality' => 'User Nationality',
+			'billing_country' => 'Billing Country',
+			'billing_state' => 'Billing State',
+			//'user_mp_status' => 'User MP Status',
+			// 'user_business_type' => 'User Business Type', // Commented out since it's conditionally added
+		];
+
+		if (isset($data['user_mp_status'])) {
+			$create_required_fields['user_mp_status'] = 'User MP Status';
+		}
+
+		// If 'user_mp_status' is 'individual', add 'user_business_type' to the list of required fields
+		if (isset($data['user_mp_status']) && $data['user_mp_status'] === 'business') {
+			$create_required_fields['user_business_type'] = 'User Business Type';
+		}
+
+		$update_required_fields = [
+			'user_birthday' => 'User Birthday',
+			'user_nationality' => 'User Nationality',
+			'billing_country' => 'Billing Country',
+			'legal_email' => 'Legal Email',
+			'compagny_number' => 'Company Number',
+			'headquarters_addressline1' => 'Headquarters Addressline1',
+			'headquarters_city' => 'Headquarters City',
+			'headquarters_region' => 'Headquarters Region',
+			'headquarters_postalcode' => 'Headquarters Postalcode',
+			'headquarters_country' => 'Headquarters Country',
+			'termsconditions' => 'Terms Conditions',
+		];
+
+		$required_fields = ($data_type === 'update_mp_business_information') ? $update_required_fields : $create_required_fields;
+
+		foreach ($required_fields as $field => $label) {
+
+			// Check if the field is empty
+			if (empty($data[$field])) {
+				$errors[$field] = "Error: {$label} is required.";
+			} else {
+				// Additional validation for specific fields
+				switch ($field) {
+					case 'legal_email':
+						// Validate email format
+						if (!filter_var($data[$field], FILTER_VALIDATE_EMAIL)) {
+							$errors[$field] = "Error: {$label} is not a valid email address.";
+						}
+						break;
+					case 'compagny_number':
+						// Validate company number using a custom function
+						$cn_validation = $this->mp->check_company_number_patterns($data[$field]);
+
+						if ($cn_validation != 'found') {
+							$errors[$field] = "Error: {$label} is not a valid.";
+						}
+						break;
+					// Add more cases for other fields
+					default:
+						// No specific validation for other fields
+						break;
+				}
+			}
+		}
+		return $errors;
 	}
 
 	// Data sanitize 
