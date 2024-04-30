@@ -747,7 +747,7 @@ class WCFM_PG_MangoPay
 			'hq_region' => 'Headquarters Region',
 			'hq_postalcode' => 'Headquarters Postalcode',
 			'hq_country' => 'Headquarters Country',
-			'termsconditions' => 'Terms Conditions',
+			'terms_conditions' => 'Terms Conditions',
 		];
 
 		$business_required_fields = [
@@ -761,7 +761,8 @@ class WCFM_PG_MangoPay
 				$required_fields = array_merge($required_fields, $business_required_fields);
 			}
 		}
-		//	error_log(print_r($required_fields, true));
+			error_log(print_r($data, true));
+			error_log(print_r($required_fields, true));
 
 		foreach ($required_fields as $field => $label) {
 
@@ -800,16 +801,23 @@ class WCFM_PG_MangoPay
 	 */
 	public function wcfm_create_mp_account($wp_user_id, $data)
 	{
-		//error_log(print_r($data, true));
-
-		// validation process
+		// Validation process
 		$errors = $this->validate_data($wp_user_id, $data);
 
+		// If there are validation errors
 		if (!empty($errors)) {
-			wp_send_json_error(['errors' => $errors]);
+			// Output JSON response for error
+			echo '{"status": false, "message": "Validation failed", "errors": ' . json_encode($errors) . '}';
+			// Terminate script execution
+			die();
 		} else {
+			// Output JSON response for success
+			echo '{"status": true, "message": "Settings saved successfully - my customize"}';
+			// Terminate script execution
+			die();
 		}
 	}
+
 
 	public function update_mangopay_settings($wp_user_id, $wcfm_settings_form)
 	{

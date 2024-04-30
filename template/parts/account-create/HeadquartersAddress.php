@@ -114,14 +114,14 @@
         //     'value' => '<p id="error-message" class="description  wcfm_page_options_desc custom-mangopay-form-error"></p>',
         // ),
 
-        $gateway_slug . '_termsAndConditionsAccepted' => array(
+        $gateway_slug . '_terms_conditions' => array(
             'label' => __('Agree  <a target="_blank" href="' . $site_url . '">Terms & Conditions!</a>', 'wc-multivendor-marketplace'),
-            'name' => $gateway_slug . '_termsAndConditionsAccepted',
+            'name' => 'payment[' . $gateway_slug . '][terms_conditions]',
             'type' => 'checkbox',
             'class' => 'wcfm-checkbox wcfm_ele paymode_field paymode_' . $gateway_slug,
             'label_class' => 'wcfm_title paymode_field paymode_' . $gateway_slug,
             'value' => 'yes',
-            'dfvalue' => $settings['termsconditions'],
+            'dfvalue' => $settings['terms_conditions'],
             'custom_attributes' => array(
                 'required' => 'required'
             ),

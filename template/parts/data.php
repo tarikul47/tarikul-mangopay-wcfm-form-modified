@@ -60,7 +60,7 @@ $settings['hq_postalcode'] = get_user_meta($vendor_id, 'headquarters_postalcode'
 $settings['hq_country'] = get_user_meta($vendor_id, 'headquarters_country', true) ? get_user_meta($vendor_id, 'headquarters_country', true) : '';
 
 // termsconditions data 
-$settings['termsconditions'] = get_user_meta($vendor_id, 'termsconditions', true) ? 'yes' : 'no';
+$settings['terms_conditions'] = get_user_meta($vendor_id, 'terms_conditions', true) ? 'yes' : 'no';
 
 /**
  * KYC data 
