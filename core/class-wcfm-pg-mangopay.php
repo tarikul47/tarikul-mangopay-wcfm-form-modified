@@ -676,6 +676,7 @@ class WCFM_PG_MangoPay
 
 		// check vendor exist mp account or not 
 		$mp_user_id = $this->mp->get_mp_user_id($vendor_id);
+		//	$mp_user_id = "user_m_01HW3FYPD8EDYHZMGJ490A6CZR";
 
 
 		//	if (isset($mp_user_id) && !empty($mp_user_id)) {
@@ -742,11 +743,11 @@ class WCFM_PG_MangoPay
 			'compnay_name' => 'Compnay Name',
 			'user_mp_status' => 'User MP Status',
 			'user_business_type' => 'User Business Type', // Commented out since it's conditionally added
-			'hq_address' => 'Headquarters Addressline1',
-			'hq_city' => 'Headquarters City',
-			'hq_region' => 'Headquarters Region',
-			'hq_postalcode' => 'Headquarters Postalcode',
-			'hq_country' => 'Headquarters Country',
+			'headquarters_addressline1' => 'Headquarters Addressline1',
+			'headquarters_city' => 'Headquarters City',
+			'headquarters_region' => 'Headquarters Region',
+			'headquarters_postalcode' => 'Headquarters Postalcode',
+			'headquarters_country' => 'Headquarters Country',
 			'terms_conditions' => 'Terms Conditions',
 		];
 
@@ -761,8 +762,8 @@ class WCFM_PG_MangoPay
 				$required_fields = array_merge($required_fields, $business_required_fields);
 			}
 		}
-			error_log(print_r($data, true));
-			error_log(print_r($required_fields, true));
+		error_log(print_r($data, true));
+		error_log(print_r($required_fields, true));
 
 		foreach ($required_fields as $field => $label) {
 
@@ -810,11 +811,82 @@ class WCFM_PG_MangoPay
 			echo '{"status": false, "message": "Validation failed", "errors": ' . json_encode($errors) . '}';
 			// Terminate script execution
 			die();
+
 		} else {
-			// Output JSON response for success
-			echo '{"status": true, "message": "Settings saved successfully - my customize"}';
+			// MP account create and got the mp id 
+			//	echo '{"status": true, "mp_id":125466, "message": "Successfully ||| You have created Mangopay account!-SANITIZE"}';
 			// Terminate script execution
-			die();
+			//die();
+			//	Update user meta here and send success response.
+			try {
+				// Set the initial status to true
+				$status = true;
+				$errorMessages = [];
+
+				error_log(print_r('before sanitize', true));
+
+				// Sanitize the input data
+				$sanitized_data = $this->sanitize_input($data);
+
+				error_log(print_r('before save', true));
+
+				// Save the sanitized data as user meta
+				$this->save_user_meta($wp_user_id, $sanitized_data);
+
+				error_log(print_r('before set MP account', true));
+
+				$mp_user_id = $this->mp->set_mp_user($wp_user_id);
+
+				error_log(print_r('After set MP account', true));
+				error_log(print_r($mp_user_id, true));
+
+				// Call dependent function 1
+				if (!$mp_user_id) {
+					$status = false;
+					$errorMessages[] = 'Mangopay account creation failed!';
+				}
+
+				// Call dependent function 2  
+				if (!$this->mp->set_mp_wallet($mp_user_id)) {
+					$status = false;
+					$errorMessages[] = 'Mangopay wallet creration failed!';
+				}
+
+				// Check the status and send appropriate JSON response
+				if ($status) {
+					//	wp_send_json_success(['msg' => 'Successfully You have created Mangopay account!']);
+					// Output JSON response for success
+					echo '{"status": true, "mp_id":' . $mp_user_id . ',"message": "Successfully You have created Mangopay account!"}';
+					// Terminate script execution
+					die();
+
+				} else {
+					//	wp_send_json_error(['msg' => 'An error occurred in one of the functions!']);
+					$errorMessage = implode(' ', $errorMessages);
+
+					// Output JSON response for success
+					echo '{"status": false, "message": "Mangopay issue - 859", "errors": ' . json_encode($errorMessage) . '}';
+					die();
+					//	wp_send_json_error(['msg' => $errorMessage]);
+				}
+			} catch (MangoPay\Libraries\ResponseException $e) {
+				// Handle the MangoPay ResponseException
+				mangopay_log($e->GetMessage(), 'error');
+				//wp_send_json_error(['msg' => 'An Error Occurred!']);
+				echo '{"status": false, "message": "Mangopay issue - 867", "errors": ' . json_encode($errorMessage) . '}';
+				die();
+			} catch (MangoPay\Libraries\Exception $e) {
+				// Handle the MangoPay Exception
+				mangopay_log($e->GetMessage(), 'error');
+				echo '{"status": false, "message": "Mangopay issue - 872", "errors": ' . json_encode($errorMessage) . '}';
+				die();
+				//wp_send_json_error(['msg' => 'An Error Occurred!']);
+			} catch (Exception $e) {
+				// Handle any other exception
+				//wp_send_json_error(['msg' => $e->getMessage()]);
+				echo '{"status": false, "message": "Mangopay issue - 878", "errors": ' . json_encode($errorMessage) . '}';
+					die();
+			}
 		}
 	}
 
@@ -824,10 +896,11 @@ class WCFM_PG_MangoPay
 		$gateway_slug = WCFMpgmp_GATEWAY;
 
 		// Find Out MP user account 
-		$mp_user_id = $this->mp->set_mp_user($wp_user_id);
-		//	error_log(print_r($wcfm_settings_form, true));
+		$mp_user_id = $this->mp->get_mp_user_id($wp_user_id);
+		error_log(print_r('$mp_user_id', true));
+		error_log(print_r($mp_user_id, true));
 
-		// 
+
 		if (empty($mp_user_id)) {
 			// Here we need to create MP account for this user 
 			$this->wcfm_create_mp_account($wp_user_id, $wcfm_settings_form['payment']['mangopay']);
@@ -1231,31 +1304,44 @@ class WCFM_PG_MangoPay
 	}
 
 	// Common function to save input data as user meta
-	private function save_user_meta($data)
+	private function save_user_meta($wp_user_id, $data)
 	{
-		// Assuming $data['vendor_id'] is the user ID
-		$user_id = $data['vendor_id'];
 
-		$data_type = isset($data['action']) ? $data['action'] : '';
+		error_log('data');
+		error_log(print_r($data, true));
 
-		$create_required_fields = [
-			'payment_method',
-			'billing_first_name',
-			'billing_last_name',
-			'user_birthday',
-			'user_nationality',
-			'billing_country',
-			'billing_state',
-			'user_mp_status',
-			'user_business_type' // Commented out since it's conditionally added
-		];
+
+		/**
+																	 * (
+																[user_id] => 3
+																[mp_id] => 
+																	[user_birthday] => January 19, 1962
+																	[user_nationality] => ES
+																	[billing_country] => LK
+																	[compnay_name] => ggnbhnhn
+																	[user_mp_status] => business
+																	[user_business_type] => business
+																	[compagny_number] => B12345678
+																	[hq_address] => H# 197, Shaheed Smrity School Road, Hazipara(Jamai Bazar)
+																	[hq_address2] => 
+																	[hq_city] => Tongi
+																	[hq_region] => Gazipur
+																	[hq_postalcode] => 1710
+																	[hq_country] => BD
+																	[terms_conditions] => yes
+																[kyc_details] => 
+																[bank_details] => 
+															)
+																	 */
 
 		// Define create required fields
-		$update_exists_fields = [
+		$required_fields = [
 			'user_birthday',
 			'user_nationality',
 			'billing_country',
-			'legal_email',
+			'compnay_name',
+			'user_business_type',
+			'user_mp_status',
 			'compagny_number',
 			'headquarters_addressline1',
 			'headquarters_addressline2',
@@ -1263,69 +1349,22 @@ class WCFM_PG_MangoPay
 			'headquarters_region',
 			'headquarters_postalcode',
 			'headquarters_country',
-			'termsconditions',
+			'terms_conditions',
 		];
-
-		$required_fields = ($data_type === 'update_mp_business_information') ? $update_exists_fields : $create_required_fields;
 
 		// Loop through data
 		foreach ($required_fields as $key) {
 			// Handle specific fields using switch
 			switch ($key) {
-
-				case 'payment_method':
-					$vendor_data = get_user_meta($user_id, 'wcfmmp_profile_settings', true);
-					$vendor_data = is_array($vendor_data) ? $vendor_data : [];
-
-					// Ensure the 'payment' key is an array
-					$vendor_data['payment'] = $vendor_data['payment'] ?? [];
-
-					// Update 'method' in 'payment' array
-					$vendor_data['payment']['method'] = $data[$key];
-
-					// Update user meta
-					update_user_meta($user_id, 'wcfmmp_profile_settings', $vendor_data);
-					break;
-				case 'billing_first_name':
-					update_user_meta($user_id, 'first_name', $data[$key]);
-					update_user_meta($user_id, 'billing_first_name', $data[$key]);
-					break;
-				case 'billing_last_name':
-					update_user_meta($user_id, 'last_name', $data[$key]);
-					update_user_meta($user_id, 'billing_last_name', $data[$key]);
-					break;
 				case 'user_birthday':
 					// Convert date and log the result for debugging
 					$convertedDate = $this->convertDate($data[$key]);
 					// Update 'user_birthday' in user meta
-					update_user_meta($user_id, $key, $convertedDate);
-					break;
-
-				case 'user_mp_status':
-					if (!empty($data[$key])) {
-						update_user_meta($user_id, $key, $data[$key]);
-					} else {
-						update_user_meta($user_id, $key, $this->mangopayWCMain->options['default_vendor_status']);
-					}
-					break;
-				case 'user_business_type':
-					if (!empty($data[$key])) {
-						update_user_meta($user_id, $key, $data[$key]);
-					} else {
-						update_user_meta($user_id, $key, $this->mangopayWCMain->options['default_business_type']);
-					}
-					break;
-				case 'headquarters_addressline2':
-					if (!empty($data[$key])) {
-						update_user_meta($user_id, $key, $data[$key]);
-					}
+					update_user_meta($wp_user_id, $key, $convertedDate);
 					break;
 				default;
-					if (($key != 'action') || $key != 'vendor_id') {
-						//	error_log(print_r($key, true));
-						//	error_log(print_r($data[$key], true));
-						update_user_meta($user_id, $key, $data[$key]);
-					}
+					//	error_log(print_r($key, true));
+					update_user_meta($wp_user_id, $key, $data[$key]);
 					break;
 			}
 		}

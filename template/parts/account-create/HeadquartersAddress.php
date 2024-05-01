@@ -16,13 +16,13 @@
         //     'value' => '<h3><strong>' . __('Headquartes Address', 'wc-multivendor-marketplace') . '</strong></h3>',
         // ),
 
-        $gateway_slug . '_hq_address' => array(
+        $gateway_slug . '_headquarters_addressline1' => array(
             'label' => __('Headquarters address', 'wc-multivendor-marketplace'),
             'type' => 'text',
-            'name' => 'payment[' . $gateway_slug . '][hq_address]',
+            'name' => 'payment[' . $gateway_slug . '][headquarters_addressline1]',
             'class' => 'wcfm-text wcfm_ele paymode_field paymode_' . $gateway_slug,
             'label_class' => 'wcfm_title wcfm_ele paymode_field paymode_' . $gateway_slug,
-            'value' => $settings['hq_address'],
+            'value' => $settings['headquarters_addressline1'],
             'custom_attributes' => array(
                 'required' => 'required'
             ),
@@ -34,22 +34,22 @@
         //     'value' => '<p id="error-message" class="description  wcfm_page_options_desc custom-mangopay-form-error"></p>',
         // ),
 
-        $gateway_slug . '_hq_address2' => array(
+        $gateway_slug . '_headquarters_addressline2' => array(
             'label' => __('Headquarters address 2', 'wc-multivendor-marketplace'),
             'type' => 'text',
-            'name' => 'payment[' . $gateway_slug . '][hq_address2]',
+            'name' => 'payment[' . $gateway_slug . '][headquarters_addressline2]',
             'class' => 'wcfm-text wcfm_ele paymode_field paymode_' . $gateway_slug,
             'label_class' => 'wcfm_title wcfm_ele paymode_field paymode_' . $gateway_slug,
-            'value' => $settings['hq_address2'],
+            'value' => $settings['headquarters_addressline2'],
         ),
 
-        $gateway_slug . '_hq_city' => array(
+        $gateway_slug . '_headquarters_city' => array(
             'label' => __('Headquarters city', 'wc-multivendor-marketplace'),
             'type' => 'text',
-            'name' => 'payment[' . $gateway_slug . '][hq_city]',
+            'name' => 'payment[' . $gateway_slug . '][headquarters_city]',
             'class' => 'wcfm-text wcfm_ele paymode_field paymode_' . $gateway_slug,
             'label_class' => 'wcfm_title wcfm_ele paymode_field paymode_' . $gateway_slug,
-            'value' => $settings['hq_city'],
+            'value' => $settings['headquarters_city'],
             'custom_attributes' => array(
                 'required' => 'required'
             ),
@@ -60,13 +60,13 @@
         //     'value' => '<p id="error-message" class="description  wcfm_page_options_desc custom-mangopay-form-error"></p>',
         // ),
 
-        $gateway_slug . '_hq_region' => array(
+        $gateway_slug . '_headquarters_region' => array(
             'label' => __('Headquarters region', 'wc-multivendor-marketplace'),
             'type' => 'text',
-            'name' => 'payment[' . $gateway_slug . '][hq_region]',
+            'name' => 'payment[' . $gateway_slug . '][headquarters_region]',
             'class' => 'wcfm-text wcfm_ele paymode_field paymode_' . $gateway_slug,
             'label_class' => 'wcfm_title wcfm_ele paymode_field paymode_' . $gateway_slug,
-            'value' => $settings['hq_region'],
+            'value' => $settings['headquarters_region'],
             'custom_attributes' => array(
                 'required' => 'required'
             ),
@@ -78,13 +78,13 @@
         //     'value' => '<p id="error-message" class="description  wcfm_page_options_desc custom-mangopay-form-error"></p>',
         // ),
 
-        $gateway_slug . '_hq_postalcode' => array(
+        $gateway_slug . '_headquarters_postalcode' => array(
             'label' => __('Headquarters postalcode', 'wc-multivendor-marketplace'),
             'type' => 'text',
-            'name' => 'payment[' . $gateway_slug . '][hq_postalcode]',
+            'name' => 'payment[' . $gateway_slug . '][headquarters_postalcode]',
             'class' => 'wcfm-text wcfm_ele paymode_field paymode_' . $gateway_slug,
             'label_class' => 'wcfm_title wcfm_ele paymode_field paymode_' . $gateway_slug,
-            'value' => $settings['hq_postalcode'],
+            'value' => $settings['headquarters_postalcode'],
             'custom_attributes' => array(
                 'required' => 'required'
 
@@ -96,14 +96,14 @@
         //     'value' => '<p id="error-message" class="description  wcfm_page_options_desc custom-mangopay-form-error"></p>',
         // ),
 
-        $gateway_slug . '_hq_country' => array(
+        $gateway_slug . '_headquarters_country' => array(
             'label' => __('Headquarters country', 'wc-multivendor-marketplace'),
-            'name' => 'payment[' . $gateway_slug . '][hq_country]',
+            'name' => 'payment[' . $gateway_slug . '][headquarters_country]',
             'type' => 'select',
             'options' => WC()->countries->get_countries(),
             'class' => 'wcfm-select wcfm_ele field_type_options paymode_field paymode_' . $gateway_slug,
             'label_class' => 'wcfm_title paymode_field paymode_' . $gateway_slug,
-            'value' => $settings['hq_country'],
+            'value' => $settings['headquarters_country'],
             'custom_attributes' => array(
                 'required' => 'required'
             ),

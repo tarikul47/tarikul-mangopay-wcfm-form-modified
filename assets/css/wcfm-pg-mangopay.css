@@ -181,5 +181,14 @@
 }
 
 #wcfm-main-contentainer input[type="datepicker"].wcfm_validation_failed {
-  border-left: 6px solid #f86c6b!important;
- }
+  border-left: 6px solid #f86c6b !important;
+}
+
+
+.tab-list {
+  display: none;
+}
+
+/* li.no_click:not(.clickable) {
+  pointer-events: none;
+} */

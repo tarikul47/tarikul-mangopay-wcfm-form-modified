@@ -52,12 +52,12 @@ $settings['legal_email'] = get_user_meta($vendor_id, 'legal_email', true) ? get_
 
 
 // HeadquartersAddress Data
-$settings['hq_address'] = get_user_meta($vendor_id, 'headquarters_addressline1', true) ? get_user_meta($vendor_id, 'headquarters_addressline1', true) : '';
-$settings['hq_address2'] = get_user_meta($vendor_id, 'headquarters_addressline2', true) ? get_user_meta($vendor_id, 'headquarters_addressline2', true) : '';
-$settings['hq_region'] = get_user_meta($vendor_id, 'headquarters_region', true) ? get_user_meta($vendor_id, 'headquarters_region', true) : '';
-$settings['hq_city'] = get_user_meta($vendor_id, 'headquarters_city', true) ? get_user_meta($vendor_id, 'headquarters_city', true) : '';
-$settings['hq_postalcode'] = get_user_meta($vendor_id, 'headquarters_postalcode', true) ? get_user_meta($vendor_id, 'headquarters_postalcode', true) : '';
-$settings['hq_country'] = get_user_meta($vendor_id, 'headquarters_country', true) ? get_user_meta($vendor_id, 'headquarters_country', true) : '';
+$settings['headquarters_addressline1'] = get_user_meta($vendor_id, 'headquarters_addressline1', true) ? get_user_meta($vendor_id, 'headquarters_addressline1', true) : '';
+$settings['headquarters_addressline2'] = get_user_meta($vendor_id, 'headquarters_addressline2', true) ? get_user_meta($vendor_id, 'headquarters_addressline2', true) : '';
+$settings['headquarters_region'] = get_user_meta($vendor_id, 'headquarters_region', true) ? get_user_meta($vendor_id, 'headquarters_region', true) : '';
+$settings['headquarters_city'] = get_user_meta($vendor_id, 'headquarters_city', true) ? get_user_meta($vendor_id, 'headquarters_city', true) : '';
+$settings['headquarters_postalcode'] = get_user_meta($vendor_id, 'headquarters_postalcode', true) ? get_user_meta($vendor_id, 'headquarters_postalcode', true) : '';
+$settings['headquarters_country'] = get_user_meta($vendor_id, 'headquarters_country', true) ? get_user_meta($vendor_id, 'headquarters_country', true) : '';
 
 // termsconditions data 
 $settings['terms_conditions'] = get_user_meta($vendor_id, 'terms_conditions', true) ? 'yes' : 'no';
